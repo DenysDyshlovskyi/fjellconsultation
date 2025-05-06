@@ -4,7 +4,9 @@ export default function HomePage() {
             <div
                 className={'max-w-full w-6xl border-1 border-brand-alt/25 rounded-lg flex flex-col bg-main justify-center items-center p-5 gap-4'}>
                 <p className={'text-2xl'}>Welcome Home!</p>
-                <p className={'text-xl'}>Request a ticket</p>
+                <a href={'/create'} className={'text-xl text-link underline'}>New ticket</a>
+                <a href={'/mytickets'} className={'text-xl text-link underline'}>View my tickets</a>
+                <a href={'/login'} className={'text-xl text-warning underline'}>Log out</a>
             </div>
         </div>
     )

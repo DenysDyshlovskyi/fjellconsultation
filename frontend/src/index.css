@@ -6,6 +6,8 @@
     --color-brand-alt: #446882;
     --color-text: #000000;
     --color-text-alt: #FFFFFF;
+    --color-link: #690098;
+    --color-warning: #FF0000;
 }
 
 @layer base {

@@ -9,7 +9,7 @@ export default function RegisterPage() {
                            placeholder={'Email'}></input>
                     <input className={'border-1 rounded-md border-brand px-3 py-2 w-full'}
                            placeholder={'Password'}></input>
-                    <button className={'bg-brand text-white rounded-md px-3 py-2 w-full'} type={'submit'}>Log In</button>
+                    <button className={'bg-brand text-white rounded-md px-3 py-2 w-full'} type={'submit'}>Register</button>
                 </form>
             </div>
         </div>
