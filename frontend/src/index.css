@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+    --color-main: #F8F4E9;
+    --color-brand: #8BB8E8;
+    --color-brand-alt: #446882;
+    --color-text: #000000;
+    --color-text-alt: #FFFFFF;
+}
+
+@layer base {
+    body {
+        background-color: var(--color-main);
+        color: var(--color-text);
+        overscroll-behavior: none;
+    }
+
+    input, textarea {
+        &:focus {
+            outline: none;
+        }
+    }
+}
