@@ -9,6 +9,7 @@ export default function NewTicketPage() {
                         <option>Custom Ticket</option>
                         <option>Option 1</option>
                     </select>
+                    <textarea placeholder={'Note'} className={'border-brand rounded-md border-1 w-full h-full my-3 p-2'}></textarea>
                 </form>
                 <button className={'bg-brand text-white rounded-md px-3 py-2'} type={'submit'}>Submit Ticket</button>
                 <button className={'bg-brand text-white rounded-md px-3 py-2'} type={'submit'}>Save Draft</button>
