@@ -1,20 +1,24 @@
-import Express, {
+import express, {
+    NextFunction,
+    Request,
     RequestHandler,
     Response,
-    Request,
-    NextFunction,
 } from 'express';
 import 'dotenv/config';
 import { Pool } from 'pg';
-import axios, { Axios } from 'axios';
+import axios from 'axios';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import { JSDOM } from 'jsdom';
+import DOMPurify from 'dompurify';
 
 // Defines variables for later use
-const app = Express();
-const DOMPurify = require('dompurify');
+const app = express();
 const PORT = process.env.PORT || 5000;
 const authServerURL = process.env.AUTH_SERVER;
+
+const window = new JSDOM('').window;
+const purify = DOMPurify(window);
 
 app.use(
     cors({
@@ -23,6 +27,7 @@ app.use(
     }),
 );
 app.use(cookieParser());
+app.use(express.json());
 
 app.get('/', (req, res) => {
     res.json({ message: 'heisann' });
@@ -42,16 +47,15 @@ const pool = new Pool({
 // makes sure user is authenticated and does a get request to auth server
 const isAuthenticated: RequestHandler = (req, res, next) => {
     const sessionToken = req.cookies['user_session'];
-    console.log(sessionToken);
+
     axios
         .post(`${authServerURL}/validate-session`, {
             token: sessionToken,
         })
         .then((response) => {
             const responseData = response.data.data;
-            const userId = responseData.user_id;
             // @ts-expect-error
-            req.userId = userId;
+            req.userId = responseData.user_id;
             next();
         })
         .catch((err) => {
@@ -67,7 +71,7 @@ app.post('/tickets', isAuthenticated, async (req, res) => {
     const user_id = req.userId;
 
     // Check if inputs are empty
-    if (!title || !category_id || !description || !user_id) {
+    if (!title || !category_id || !description) {
         res.status(400).json({
             error: {
                 code: 'BAD_REQUEST',
@@ -78,8 +82,8 @@ app.post('/tickets', isAuthenticated, async (req, res) => {
     }
 
     // Sanitize inputs
-    const cleanTitle = DOMPurify.sanitize(title);
-    const cleanDescription = DOMPurify.sanitize(description);
+    const cleanTitle = purify.sanitize(title);
+    const cleanDescription = purify.sanitize(description);
 
     // Insert into database
     const client = await pool.connect();
@@ -179,15 +183,15 @@ app.get('/users', async (req, res) => {
     try {
         const { rows } = await pool.query(`
             SELECT u.id,
-                u.email,
-                u.first_name,
-                u.last_name,
-                u.password,
-                u.created_at,
-                COALESCE(JSON_AGG(r.name) FILTER (WHERE r.name IS NOT NULL), '[]') AS roles
+                   u.email,
+                   u.first_name,
+                   u.last_name,
+                   u.password,
+                   u.created_at,
+                   COALESCE(JSON_AGG(r.name) FILTER (WHERE r.name IS NOT NULL), '[]') AS roles
             FROM users u
-                LEFT JOIN user_roles ur ON u.id = ur.user_id
-                LEFT JOIN roles r ON ur.role_id = r.id
+                     LEFT JOIN user_roles ur ON u.id = ur.user_id
+                     LEFT JOIN roles r ON ur.role_id = r.id
             GROUP BY u.id, u.email, u.first_name, u.last_name, u.created_at
             ORDER BY u.created_at, u.id
         `);
@@ -231,19 +235,19 @@ app.get('/users/:id', async (req, res) => {
     try {
         const { rows } = await pool.query(
             `
-            SELECT u.id,
-                u.email,
-                u.first_name,
-                u.last_name,
-                u.created_at,
-                COALESCE(JSON_AGG(r.name) FILTER (WHERE r.name IS NOT NULL), '[]') AS roles
-            FROM users u
-                LEFT JOIN user_roles ur ON u.id = ur.user_id
-                LEFT JOIN roles r ON ur.role_id = r.id
-            WHERE u.id = $1
-            GROUP BY u.id, u.email, u.first_name, u.last_name, u.created_at
-            ORDER BY u.created_at, u.id
-        `,
+                SELECT u.id,
+                       u.email,
+                       u.first_name,
+                       u.last_name,
+                       u.created_at,
+                       COALESCE(JSON_AGG(r.name) FILTER (WHERE r.name IS NOT NULL), '[]') AS roles
+                FROM users u
+                         LEFT JOIN user_roles ur ON u.id = ur.user_id
+                         LEFT JOIN roles r ON ur.role_id = r.id
+                WHERE u.id = $1
+                GROUP BY u.id, u.email, u.first_name, u.last_name, u.created_at
+                ORDER BY u.created_at, u.id
+            `,
             [user_id],
         );
 
@@ -300,7 +304,7 @@ app.all(/(.*)/, (req, res) => {
 });
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-    //console.error(err);
+    console.error(err);
     res.status(500).json({
         error: {
             message: 'Internal server error',

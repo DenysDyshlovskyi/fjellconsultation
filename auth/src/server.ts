@@ -116,9 +116,7 @@ async function validateSession(sessionToken: string) {
 }
 
 app.post('/validate-session', async (req, res) => {
-    console.log('test');
     const sessionToken = req.body.token;
-    console.log(sessionToken);
 
     if (!sessionToken) {
         res.status(400).json({
@@ -343,7 +341,6 @@ app.post('/login', async (req, res) => {
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: sessionToken.expiresInMs,
-            domain: '10.2.2.49:5000',
         });
 
         res.status(200).json({
