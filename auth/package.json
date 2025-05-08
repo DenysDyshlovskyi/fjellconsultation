@@ -13,12 +13,22 @@
   "type": "commonjs",
   "description": "",
   "devDependencies": {
+    "@types/change-case": "^0.0.30",
+    "@types/cookie-parser": "^1.4.8",
     "@types/express": "^5.0.1",
+    "@types/pg": "^8.12.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@types/argon2": "^0.14.1",
+    "@types/cors": "^2.8.17",
+    "argon2": "^0.43.0",
+    "change-case": "^5.4.4",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "pg": "^8.15.6"
   }
 }
