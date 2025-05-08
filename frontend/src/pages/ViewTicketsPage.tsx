@@ -2,7 +2,7 @@ export default function ViewTicketsPage() {
     return (
         <div className={'w-full h-screen flex justify-center items-center bg-brand/20 p-4'}>
             <div
-                className={'max-w-full w-6xl border-1 border-brand-alt/25 rounded-lg flex flex-col bg-main justify-center items-center p-5 gap-4'}>
+                className={'max-w-full w-6xl border-1 border-brand-alt/25 rounded-lg flex flex-col bg-main justify-center items-center p-10 gap-4'}>
                 <p className={'text-2xl'}>Your tickets</p>
                 <table className={'w-full table-auto overflow-y-scroll'}>
                     <thead className={'w-full h-16 border-1'}>
