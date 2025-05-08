@@ -1,11 +1,10 @@
-import express, {NextFunction, Request, Response} from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import 'dotenv/config';
 import db from './config/db';
 import argon2 from 'argon2';
 import crypto from 'crypto';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import changeCase from 'change-case';
 
 const app = express();
 
@@ -43,9 +42,9 @@ function generateSessionToken() {
 }
 
 async function createSession({
-                                 req,
-                                 userId,
-                             }: {
+    req,
+    userId,
+}: {
     req: Request;
     userId: string;
 }) {
@@ -81,7 +80,7 @@ async function createSession({
 
         await client.query('COMMIT');
 
-        return {sessionToken, sessionId};
+        return { sessionToken, sessionId };
     } catch (err) {
         await client.query('ROLLBACK');
         throw err;
@@ -94,7 +93,7 @@ async function validateSession(sessionToken: string) {
     const hashedRequestToken = generateHashedToken(sessionToken);
 
     try {
-        const {rows} = await db.query(
+        const { rows } = await db.query(
             `SELECT user_id, session_id, expires_at, issued_at
              FROM session_tokens st
              WHERE st.token_hash = $1
@@ -108,8 +107,8 @@ async function validateSession(sessionToken: string) {
             userId: rows[0].user_id,
             token: {
                 issuedAt: rows[0].issued_at,
-                expiresAt: rows[0].expires_at
-            }
+                expiresAt: rows[0].expires_at,
+            },
         };
     } catch (err) {
         throw err;
@@ -117,9 +116,9 @@ async function validateSession(sessionToken: string) {
 }
 
 app.post('/validate-session', async (req, res) => {
-    console.log('test')
+    console.log('test');
     const sessionToken = req.body.token;
-    console.log(sessionToken)
+    console.log(sessionToken);
 
     if (!sessionToken) {
         res.status(400).json({
@@ -136,7 +135,7 @@ app.post('/validate-session', async (req, res) => {
 
         if (!session) {
             res.status(401).json({
-                error: {message: 'Session is invalid or expired.'},
+                error: { message: 'Session is invalid or expired.' },
             });
             return;
         }
@@ -149,8 +148,8 @@ app.post('/validate-session', async (req, res) => {
                 user_id: session.userId,
                 token: {
                     issued_at: session.token.issuedAt,
-                    expires_at: session.token.expiresAt
-                }
+                    expires_at: session.token.expiresAt,
+                },
             },
         });
     } catch (err) {
@@ -159,7 +158,7 @@ app.post('/validate-session', async (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const {email, first_name, last_name, password} = req.body;
+    const { email, first_name, last_name, password } = req.body;
 
     if (!email || !first_name || !last_name || !password) {
         res.status(400).json({
@@ -186,7 +185,7 @@ app.post('/register', async (req, res) => {
         );
         res.status(201).json({
             message: 'User registered successfully!',
-            data: {user: {user_id, email, first_name, last_name}},
+            data: { user: { user_id, email, first_name, last_name } },
         });
     } catch (err) {
         // Fix later
@@ -207,7 +206,7 @@ app.post('/register', async (req, res) => {
 
 app.get('/users', async (req, res) => {
     try {
-        const {rows} = await db.query(`
+        const { rows } = await db.query(`
             SELECT u.id,
                    u.email,
                    u.first_name,
@@ -224,7 +223,7 @@ app.get('/users', async (req, res) => {
         res.status(200).json({
             status: 200,
             message: 'Users fetched successfully.',
-            data: {users: rows},
+            data: { users: rows },
         });
     } catch (err) {
         throw err;
@@ -251,7 +250,7 @@ app.get('/users/:id', async (req, res) => {
     }
 
     try {
-        const {rows} = await db.query(
+        const { rows } = await db.query(
             `
                 SELECT u.id,
                        u.email,
@@ -284,7 +283,7 @@ app.get('/users/:id', async (req, res) => {
         res.status(200).json({
             status: 200,
             message: 'User fetched successfully.',
-            data: {user: user},
+            data: { user: user },
         });
     } catch (err) {
         throw err;
@@ -292,7 +291,7 @@ app.get('/users/:id', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
 
     if (!email || !password) {
         res.status(400).json({
@@ -307,7 +306,7 @@ app.post('/login', async (req, res) => {
     }
 
     try {
-        const {rows} = await db.query(
+        const { rows } = await db.query(
             'SELECT id, password FROM users WHERE email = $1',
             [email],
         );
@@ -337,14 +336,14 @@ app.post('/login', async (req, res) => {
             return;
         }
 
-        const {sessionToken} = await createSession({req, userId: user.id});
+        const { sessionToken } = await createSession({ req, userId: user.id });
 
         res.cookie('user_session', sessionToken.token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             maxAge: sessionToken.expiresInMs,
-            domain: '10.2.2.49:5000'
+            domain: '10.2.2.49:5000',
         });
 
         res.status(200).json({
@@ -360,7 +359,7 @@ app.post('/logout', async (req, res) => {
 
     if (!sessionToken) {
         res.status(400).json({
-            error: {message: 'You are already logged out.'},
+            error: { message: 'You are already logged out.' },
         });
         return;
     }
@@ -373,7 +372,7 @@ app.post('/logout', async (req, res) => {
     try {
         await db.query('DELETE FROM sessions WHERE id = $1', [session.id]);
 
-        res.status(200).json({message: 'User logged out successfully.'});
+        res.status(200).json({ message: 'User logged out successfully.' });
     } catch (err) {
         throw err;
     }
@@ -382,7 +381,7 @@ app.post('/logout', async (req, res) => {
 app.all(/(.*)/, (req, res) => {
     res.status(404).json({
         status: 404,
-        error: {code: 'NOT_FOUND', message: 'Endpoint not found.'},
+        error: { code: 'NOT_FOUND', message: 'Endpoint not found.' },
     });
 });
 
@@ -400,4 +399,4 @@ const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
-5
+5;
