@@ -117,7 +117,7 @@ app.post('/tickets', isAuthenticated, async (req, res) => {
 });
 
 // Endpoint for fetching categories
-app.get('/categories', async (req, res) => {
+app.get('/tickets/categories', async (req, res) => {
     // Get categories from database
     const { rows } = await pool.query('SELECT * FROM ticket_categories');
 
