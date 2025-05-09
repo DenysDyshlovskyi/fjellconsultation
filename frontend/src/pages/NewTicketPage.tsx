@@ -15,10 +15,12 @@ export default function NewTicketPage() {
         }))
     }
 
+    const apiServerUrl = import.meta.env.VITE_API_SERVER_URL;
+
     const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
         e.target.reset();
-        axios.post('/api/tickets', {
+        axios.post(`${apiServerUrl}/api/tickets`, {
                 title: ticketForm.title,
                 description: ticketForm.description,
                 category: ticketForm.category,

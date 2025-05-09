@@ -23,7 +23,7 @@ const purify = DOMPurify(window);
 app.use(
     cors({
         credentials: true,
-        origin: authServerURL,
+        origin: [authServerURL, 'http://localhost:5173'],
     }),
 );
 app.use(cookieParser());
@@ -188,7 +188,7 @@ app.get('/users', async (req, res) => {
                    u.last_name,
                    u.password,
                    u.created_at,
-                   COALESCE(JSON_AGG(r.name) FILTER (WHERE r.name IS NOT NULL), '[]') AS roles
+                   COALESCE(JSON_AGG(r.name) FILTER(WHERE r.name IS NOT NULL), '[]') AS roles
             FROM users u
                      LEFT JOIN user_roles ur ON u.id = ur.user_id
                      LEFT JOIN roles r ON ur.role_id = r.id
@@ -240,7 +240,7 @@ app.get('/users/:id', async (req, res) => {
                        u.first_name,
                        u.last_name,
                        u.created_at,
-                       COALESCE(JSON_AGG(r.name) FILTER (WHERE r.name IS NOT NULL), '[]') AS roles
+                       COALESCE(JSON_AGG(r.name) FILTER(WHERE r.name IS NOT NULL), '[]') AS roles
                 FROM users u
                          LEFT JOIN user_roles ur ON u.id = ur.user_id
                          LEFT JOIN roles r ON ur.role_id = r.id
