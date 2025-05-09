@@ -153,6 +153,36 @@ app.get('/tickets/categories', async (req, res) => {
     res.status(200).json(responseJson)
 })
 
+// Creates a category
+app.post('/tickets/categories', async (req, res) => {
+    // Get post data
+    const categoryName = req.body.name
+
+    // Create category uuid
+    const categoryId = crypto.randomUUID();
+
+    // Insert into database
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        await client.query('INSERT INTO ticket_categories (id, name) VALUES ($1::uuid, $2::text)', [categoryId, categoryName]);
+        await client.query('COMMIT');
+        res.status(201).json({
+            message: 'Category successfully submitted.',
+            data: {
+                categoryId: categoryId,
+                categoryName: categoryName
+            },
+        });
+    } catch (err) {
+        await client.query('ROLLBACK');
+        console.log(err);
+        throw err;
+    } finally {
+        client.release();
+    }
+})
+
 app.get('/cookie_test', (req, res) => {
     console.log(req.cookies['test']);
     res.cookie('test', 'heisann', {
