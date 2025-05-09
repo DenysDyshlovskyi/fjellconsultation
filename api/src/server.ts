@@ -15,7 +15,7 @@ import DOMPurify from 'dompurify';
 // Defines variables for later use
 const app = express();
 const PORT = process.env.PORT || 5000;
-const authServerURL = process.env.AUTH_SERVER;
+const authServerURL = String(process.env.AUTH_SERVER);
 
 const window = new JSDOM('').window;
 const purify = DOMPurify(window);
