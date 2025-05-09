@@ -278,41 +278,62 @@ app.get('/users/:id', async (req, res) => {
 });
 
 // Endpoint to retrieve a users tickets
-app.get('/get_tickets', isAuthenticated, async (req, res) => {
+app.get('/tickets', isAuthenticated, async (req, res) => {
     // @ts-expect-error
     const userID = req.userId;
 
     // Get tickets with user id
     const { rows } = await pool.query(
-        'SELECT * FROM tickets WHERE user_id=$1::uuid',
-        [userID],
+        `SELECT 
+            tickets.id,
+            tickets.title,
+            tickets.category_id,
+            ticket_categories.name AS category_name,
+            ticket_messages.message AS description
+        FROM tickets
+        JOIN ticket_categories ON tickets.category_id = ticket_categories.id
+        JOIN ticket_messages ON tickets.id = ticket_messages.ticket_id
+        WHERE tickets.user_id = $1::uuid AND ticket_messages.is_description = $2::boolean`,
+        [userID, true],
     );
 
     // Check if user has any tickets
     if (rows.length === 0) {
-        res.status(404).json({
-            error: {
-                code: 'NOT_FOUND',
-                message:
-                    "This user has no tickets available.",
-            },
+        res.status(200).json({
+            message: "You have no tickets."
         });
         return
     }
 
-    // Loop through tickets and add to response
-    const responseJson = {
-        message: "Tickets found!",
-        data: []
-    }
+    // Define ticket type
+    type Ticket = {
+        ticketId: any;
+        ticketTitle: string;
+        ticketCategory: string;
+        ticketDescription: string;
+    };
 
+    // Loop through tickets and add to response
+    const responseJson: { message: string; data: Ticket[] } = {
+        message: "Tickets successfully retrieved!",
+        data: []
+    };
+
+    // Push relevant info to data array
     rows.forEach((row) => {
-        let rowJson = {
+        responseJson.data.push({
             ticketId: row.id,
-            ticketTitle: row.title
-        };
+            ticketTitle: row.title,
+            ticketCategory: row.category_name,
+            ticketDescription: row.description
+        });
     })
+
+    // Respond with the json
+    res.status(200).json(responseJson)
 });
+
+
 
 // If route was not found
 app.all(/(.*)/, (req, res) => {
@@ -325,6 +346,7 @@ app.all(/(.*)/, (req, res) => {
     });
 });
 
+// Responds with internal server error if any errors arise
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     console.error(err);
     res.status(500).json({
