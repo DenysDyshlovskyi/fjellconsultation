@@ -116,6 +116,43 @@ app.post('/tickets', isAuthenticated, async (req, res) => {
     }
 });
 
+// Endpoint for fetching categories
+app.get('/categories', async (req, res) => {
+    // Get categories from database
+    const { rows } = await pool.query('SELECT * FROM ticket_categories');
+
+    // Check if user has any tickets
+    if (rows.length === 0) {
+        res.status(200).json({
+            message: "No categories found"
+        });
+        return
+    }
+
+    // Define category type
+    type Category = {
+        categoryId: any;
+        categoryName: string;
+    };
+
+    // Loop through tickets and add to response
+    const responseJson: { message: string; data: Category[] } = {
+        message: "Categories successfully retrieved!",
+        data: []
+    };
+
+    // Push relevant info to data array
+    rows.forEach((row) => {
+        responseJson.data.push({
+            categoryId: row.id,
+            categoryName: row.name
+        });
+    })
+
+    // Respond with the json
+    res.status(200).json(responseJson)
+})
+
 app.get('/cookie_test', (req, res) => {
     console.log(req.cookies['test']);
     res.cookie('test', 'heisann', {
