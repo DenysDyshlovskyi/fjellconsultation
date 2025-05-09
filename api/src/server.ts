@@ -29,9 +29,6 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.json({ message: 'heisann' });
-});
 // Set up database connection
 const pool = new Pool({
     user: process.env.PGUSER,
@@ -290,6 +287,31 @@ app.get('/get_tickets', isAuthenticated, async (req, res) => {
         'SELECT * FROM tickets WHERE user_id=$1::uuid',
         [userID],
     );
+
+    // Check if user has any tickets
+    if (rows.length === 0) {
+        res.status(404).json({
+            error: {
+                code: 'NOT_FOUND',
+                message:
+                    "This user has no tickets available.",
+            },
+        });
+        return
+    }
+
+    // Loop through tickets and add to response
+    const responseJson = {
+        message: "Tickets found!",
+        data: []
+    }
+
+    rows.forEach((row) => {
+        let rowJson = {
+            ticketId: row.id,
+            ticketTitle: row.title
+        };
+    })
 });
 
 // If route was not found
