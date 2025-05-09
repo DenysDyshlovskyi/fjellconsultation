@@ -1,7 +1,10 @@
 import { ChangeEvent, useState } from 'react';
 import axios from 'axios';
+import {useNavigate} from "react-router";
 
 export default function RegisterPage() {
+    const navigate = useNavigate()
+
     const [registerForm, setRegisterForm] = useState({
         email: '',
         password: '',
@@ -24,7 +27,12 @@ export default function RegisterPage() {
 
     const handleSubmit = (e: ChangeEvent<HTMLFormElement>) => {
         e.preventDefault();
-        e.target.reset();
+        setRegisterForm({
+            email: '',
+            password: '',
+            firstName: '',
+            lastName: '',
+        })
         axios
             .post(`${authServerUrl}/register`, {
                 email: registerForm.email,
@@ -34,6 +42,7 @@ export default function RegisterPage() {
             })
             .then(function (response) {
                 console.log(response);
+                navigate('/login')
             })
             .catch(function (error) {
                 console.log(error);
@@ -64,24 +73,29 @@ export default function RegisterPage() {
                         required
                         type={'email'}
                         onChange={handleChange}
+                        value={registerForm.email}
                         className={
                             'border-1 rounded-md border-brand px-3 py-2 w-full'
                         }
                         placeholder={'Email'}
                     ></input>
                     <input
-                        name={'first_name'}
+                        name={'firstName'}
+                        type={'text'}
                         required
                         onChange={handleChange}
+                        value={registerForm.firstName}
                         className={
                             'border-1 rounded-md border-brand px-3 py-2 w-full'
                         }
                         placeholder={'First Name'}
                     ></input>
                     <input
-                        name={'last_name'}
+                        type={'text'}
+                        name={'lastName'}
                         required
                         onChange={handleChange}
+                        value={registerForm.lastName}
                         className={
                             'border-1 rounded-md border-brand px-3 py-2 w-full'
                         }
@@ -92,6 +106,7 @@ export default function RegisterPage() {
                         required
                         type={'password'}
                         onChange={handleChange}
+                        value={registerForm.password}
                         className={
                             'border-1 rounded-md border-brand px-3 py-2 w-full'
                         }
